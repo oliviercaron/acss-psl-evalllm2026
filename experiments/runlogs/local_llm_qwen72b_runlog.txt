@@ -1,0 +1,34 @@
+C:\Users\Olivier\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\plugin\_schema_validator.py:39: UserWarning: ImportError while loading the `logfire-plugin` Pydantic plugin, this plugin will not be installed.
+
+ImportError("cannot import name 'LogData' from 'opentelemetry.sdk._logs' (C:\\Users\\Olivier\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\opentelemetry\\sdk\\_logs\\__init__.py)")
+  plugins = get_plugins()
+=== Global Scores (WITHOUT memory — LLM prompt=en) ===
+  entity_accuracy: 91.49
+  concept_accuracy: 100.0
+  strict_KB_accuracy: 91.49
+  partial_KB_accuracy: 91.49
+  precision: 91.88
+  recall: 91.49
+  f1: 91.68
+
+=== Scores by KB (WITHOUT memory — LLM prompt=en) ===
+
+  GeoNames:
+    entity_accuracy: 90.82
+    concept_accuracy: None
+    strict_KB_accuracy: 90.82
+    partial_KB_accuracy: 90.82
+    precision: 89.35
+    recall: 90.82
+    f1: 90.08
+
+  MeSH:
+    entity_accuracy: 92.73
+    concept_accuracy: 100.0
+    strict_KB_accuracy: 92.73
+    partial_KB_accuracy: 92.73
+    precision: 96.84
+    recall: 92.73
+    f1: 94.74
+
+  >>> RANKING SCORE: 91.59

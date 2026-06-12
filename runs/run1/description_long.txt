@@ -1,0 +1,10 @@
+Run 1 — Cascade frugale règles + GPT-5.4-nano zero-shot listwise reranker
+- Retrieval déterministe SQLite/pickle (GeoNames 13M lieux + MeSH FR Inserm + MeSH EN NLM), dictionnaires manuels FR (157 termes médicaux), patterns NIL lexicaux pour locations sous-commune, strain override déterministe (regex + clés candidate o104/o157/ehec/stec).
+- LLM (GPT-5.4-nano, temperature=0, max_completion_tokens=100) appelé en mode "listwise picker" sur les cas ambigus ≥2 candidats, jamais en génération libre.
+- Post-processing GPS pour réconcilier les feature codes GeoNames (PPL vs ADM4 communes via haversine <5km + ratio population >0.80).
+
+Score sur train (--no-memory) : RANKING 92.22.
+Empreinte carbone : voir CARBON_FOOTPRINT.md (run local Gemma ~1,15 g, mesuré ; run API nano ~1,8-4,0 g, estimé EcoLogits).
+Aucun fine-tuning, aucun modèle entraîné par nous.
+
+Code source : https://github.com/oliviercaron/evalllm2026 (privé, sera rendu public après le challenge).

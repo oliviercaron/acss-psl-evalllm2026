@@ -1,0 +1,35 @@
+[SUPERSÉDÉ] Estimation initiale (méthode par-token, grille US, ~69 g). Méthode + chiffres
+corrigés dans ../../CARBON_FOOTPRINT.md et ../submission_sent/CARBON_FOOTPRINT.txt :
+Green Algorithms pour le matériel connu + EcoLogits pour l'API ; CPU réel = AMD Ryzen 5 5600X.
+Chiffres corrigés : run local Gemma ~1,15 g ; run API nano ~1,8-4,0 g/run (PAS ~69 g).
+NB : run1/2/3 ici = les 3 runs nano de DÉV ; la soumission finale = run_1 gemma + run_2 nano
+clean + run_3 nano test-informé (cf. ../submission_sent/).
+======================================================================
+
+Empreinte carbone Run 1 sur test_evalLLM.json (200 docs, 1840 entités)
+======================================================================
+
+Durée totale du run : ~11 minutes (sync, séquentiel)
+
+Composants :
+- LLM cloud (GPT-5.4-nano, OpenAI/Azure US-East) :
+  * ~800-900 appels estimés (mentions avec ≥2 candidats)
+  * ~310 tokens input + ~50 tokens output par appel
+  * Énergie ≈ 0.5 mWh/token × ~315K tokens = 157 Wh × PUE 1.12 = 176 Wh = 0.176 kWh
+  * Intensité carbone Azure US-East ≈ 370 g CO₂eq/kWh
+  * Sous-total LLM : ~65 g CO₂eq
+
+- CPU local (i7-12th gen, 35W moyen, 11 min) :
+  * 35 W × 11/60 h = 6.4 Wh = 0.0064 kWh
+  * Intensité carbone France 2025 ≈ 70 g CO₂eq/kWh (nucléaire dominant)
+  * Sous-total CPU : ~0.45 g CO₂eq
+
+- SQLite + I/O : négligeable (<0.1 g)
+
+TOTAL Run 1 : ~65 g CO₂eq
+Équivalent : ≈ 325 m en voiture thermique, ou ≈ 5 min de streaming HD
+
+Méthodologie : Green Algorithms Calculator v2.2 (Lacoste et al. 2019)
+Incertitude : ±50% sur l'énergie LLM cloud (non publiée par OpenAI)
+
+Coût API estimé : ~$0.08

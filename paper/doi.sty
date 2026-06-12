@@ -1,0 +1,10 @@
+%% Stub local minimal de doi.sty (uniquement pour compiler en local sous MiKTeX
+%% sans dépôt de paquets configuré). Sur Overleaf/TeX Live, le vrai paquet doi est
+%% utilisé. Fournit la commande \doi attendue par coria-taln2026.bst.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{doi}[2026/01/01 stub local doi]
+\RequirePackage{hyperref}
+\providecommand{\doitext}{doi:}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\doitext #1}}
+\providecommand{\DOI}[1]{\doi{#1}}
+\endinput

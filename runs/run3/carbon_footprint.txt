@@ -1,0 +1,49 @@
+[SUPERSÉDÉ] Estimation initiale (méthode par-token, grille US, ~69 g). Méthode + chiffres
+corrigés dans ../../CARBON_FOOTPRINT.md et ../submission_sent/CARBON_FOOTPRINT.txt :
+Green Algorithms pour le matériel connu + EcoLogits pour l'API ; CPU réel = AMD Ryzen 5 5600X.
+Chiffres corrigés : run local Gemma ~1,15 g ; run API nano ~1,8-4,0 g/run (PAS ~69 g).
+NB : run1/2/3 ici = les 3 runs nano de DÉV ; la soumission finale = run_1 gemma + run_2 nano
+clean + run_3 nano test-informé (cf. ../submission_sent/).
+=======================================================================
+
+Empreinte carbone Run 3 sur test_evalLLM.json (200 docs, 1840 entités)
+=======================================================================
+
+Durée du run final : ~15 minutes (sync, séquentiel).
+Note : une tentative précédente a connu un hang réseau intermittent (un appel
+HTTP stallé sans retour, indépendant de notre code — l'API répondait normalement
+en parallèle) ; le process a été relancé. Seul le run final ayant produit le
+fichier soumis est compté ci-dessous.
+
+Composants :
+- LLM cloud (GPT-5.4-nano, OpenAI/Azure US-East) :
+  * ~830-930 appels estimés (mentions avec ≥2 candidats). Légèrement moins de NIL
+    qu'en Run 2 (161 vs 205) → quelques chemins de linking supplémentaires, mais
+    beaucoup des +44 gains viennent du dictionnaire/règles (0 appel LLM) plutôt
+    que du reranker.
+  * ~310 tokens input + ~50 tokens output par appel
+  * Énergie ≈ 0.5 mWh/token × ~330K tokens = 165 Wh × PUE 1.12 = 185 Wh = 0.185 kWh
+  * Intensité carbone Azure US-East ≈ 370 g CO₂eq/kWh
+  * Sous-total LLM : ~68 g CO₂eq
+
+- CPU local (i7-12th gen, 35W moyen, 15 min) :
+  * 35 W × 15/60 h = 8.75 Wh = 0.00875 kWh
+  * Intensité carbone France 2025 ≈ 70 g CO₂eq/kWh (nucléaire dominant)
+  * Sous-total CPU : ~0.6 g CO₂eq
+
+- SQLite + pickle I/O : négligeable (<0.1 g)
+
+TOTAL Run 3 : ~69 g CO₂eq
+Équivalent : ≈ 345 m en voiture thermique, ou ≈ 5 min de streaming HD
+
+Remarque pour le bonus empreinte carbone : l'approche frugale (pas de modèle
+entraîné, pas de GPU, retrieval déterministe local + petit LLM non-raisonnant
+appelé seulement sur les cas ambigus) maintient l'empreinte de chaque run sous
+~70 g CO₂eq. Les +44 gains de Run 3 proviennent majoritairement d'ajouts
+dictionnaire/règles à coût carbone nul (aucun appel API).
+
+Méthodologie : Green Algorithms Calculator v2.2 (Lacoste et al. 2019)
+Incertitude : ±50% sur l'énergie LLM cloud (non publiée par OpenAI)
+
+Coût API estimé : ~$0.08 (run final ; les tentatives interrompues ont consommé
+quelques cents supplémentaires non comptabilisés ici).

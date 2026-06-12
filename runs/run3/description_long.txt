@@ -1,0 +1,25 @@
+Run 3 — Cascade frugale règles + GPT-5.4-nano zero-shot listwise reranker, 3e et dernière itération de la même famille méthodologique que Run 1/2.
+
+Positionnement : Run 1/2/3 sont une SEULE famille (rule-based + LLM listwise zero-shot). Run 3 ajoute des raffinements de couverture, tous justifiés par (a) le guide d'alignement officiel, (b) le train gold, ou (c) des faits MeSH vérifiables indépendamment. Aucun overtuning, aucune optimisation sur les prédictions du test. Une 2e famille (machine learning) est prévue pour l'article (12 juin), hors classement.
+
+Architecture (inchangée vs Run 1/2) : retrieval déterministe SQLite/pickle (GeoNames 13M lieux + MeSH FR Inserm + MeSH EN NLM) ; dictionnaires manuels FR ; patterns NIL lexicaux ; strain override déterministe ; LLM listwise (GPT-5.4-nano, temperature=0) sur cas ambigus ≥2 candidats ; post-processing GPS ; normalisation Greek→Latin + résolution de périphrases géographiques (ajouts Run 2).
+
+Ajouts Run 3 :
+
+TIER 1 — Ajouts dictionnaire (faible risque, fort ROI) :
+- Cluster Marburg : maladie (fièvre de Marburg, fièvre hémorragique à virus de Marburg, maladie à virus de Marburg, Marburg) → D008379 (Marburg Virus Disease) ; Marburg [DIS_REF_TO_PATH] → D029024 (Marburgvirus). Construit par symétrie stricte avec ebola/lassa déjà présents dans le dictionnaire.
+- Encéphalite à tiques : TBE, encéphalite à tique (variante singulière), méningoencéphalite à tique → D004675 (Encephalitis, Tick-Borne) ; TBEV → D004669 (Encephalitis Viruses, Tick-Borne).
+- VHC (LABEL_OVERRIDES, symétrique des patterns vih/nmc/coronavirus existants) : PATHOGEN → D016174 (Hepacivirus) ; PATH_REF_TO_DIS → D006526 (Hepatitis C).
+- Sous-régions UN (FR_GEONAMES_ALIASES) : Amérique latine → 7730009 (Latin America and the Caribbean), Caraïbes → 7729891 (Caribbean), Europe orientale → 7729884 (Eastern Europe). Ces trois sont annotées EXACTEMENT ainsi dans le train gold ; leurs alias français sont absents de GeoNames (seuls les noms anglais y figurent), d'où les NIL en Run 1/2.
+
+TIER 2 — Résolution générique d'acronymes définis en contexte :
+`_propagate_acronym_definitions` est une post-passe au niveau document. Pour une entité encore NIL dont le texte est un acronyme (2-6 majuscules/chiffres), si le texte du document contient une définition explicite « <expansion> (ACR) » où <expansion> est une entité déjà liée AVEC LE MÊME LABEL, l'id_kb et la source de l'expansion sont propagés à l'acronyme. Garde-fous (faible risque de faux positifs) : définition parenthésée explicite obligatoire, et label strictement identique (un acronyme PATHOGEN n'héritera jamais d'un id à label maladie). Mécanisme généralisable (résout des acronymes inconnus du dictionnaire) et non test-driven. Cas résolus sur le test : CRE ← « carbapenem-resistant Enterobacteriaceae (CRE) » (D000073182), SG ← « syphilis congénitale (SG) » (D013590).
+
+Résultats :
+- Distribution test : 1116 GeoNames + 563 MeSH + 161 NIL (NIL rate 8.75%, vs 11.9% Run 1).
+- Diff vs Run 2 : +44 NIL→linked (tous justifiés), 0 régression linked→NIL, 22 ID changed = variations du LLM listwise (température=0 non déterministe côté serveur ; net positif, 2 cas défavorables documentés dans stats.md).
+- Train --no-memory --llm-reranker : ranking 91.42 (Run 1 : 91.05 ; Run 2 : 91.19). Entity accuracy 91.28, GeoNames F1 89.90, MeSH F1 94.74.
+- Tests : 91 passed, 1 skipped.
+
+Aucun fine-tuning, aucun modèle entraîné par nous.
+Code source : https://github.com/oliviercaron/evalllm2026 (privé, rendu public après le challenge).

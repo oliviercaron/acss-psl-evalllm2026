@@ -1,0 +1,59 @@
+EMPREINTE CARBONE — soumission EvalLLM 2026, équipe acss-psl
+Méthodologie : matériel connu = Green Algorithms (énergie GPU mesurée pour le local) ;
+LLM via API = estimation EcoLogits (https://ecologits.ai).
+============================================================================
+Approche commune aux 3 runs : cascade déterministe à base de règles (AUCUN
+entraînement, AUCUN fine-tuning ; retrieval local sur index GeoNames/MeSH) + un
+petit LLM non-raisonnant appelé UNIQUEMENT sur les mentions ambiguës (>= 2
+candidats). Jeu de test : 200 documents / 1840 entités.
+
+----------------------------------------------------------------------------
+run_1 — reranker GEMMA-4-31B servi EN LOCAL (vLLM, 1x NVIDIA H100, France)
+----------------------------------------------------------------------------
+MATÉRIEL : GPU NVIDIA H100 (serveur de calcul, France) pour le LLM ; CPU AMD Ryzen 5
+5600X (notre PC fixe, France) pour la cascade de règles + I/O. Aucun autre GPU utilisé.
+ÉNERGIE GPU MESURÉE par nvidia-smi (puissance 1 Hz intégrée sur la fenêtre
+d'inférence du run test complet) :
+  - 779 appels LLM ; 299 953 tokens d'entrée ; 167 s ; puissance GPU moyenne 242 W.
+  - GPU H100 (datacenter) : 11,2 Wh mesurés -> 0,0112 kWh x 56 g/kWh x PUE 1,67 ~ 1,05 g.
+  - CPU Ryzen 5 5600X (PC fixe, TDP 65 W ; ~40 W en charge légère I/O-bound x 167 s
+    ~ 1,9 Wh ; PUE 1) ~ 0,10 g.
+  - Intensité carbone France = 56 g CO2eq/kWh ; PUE datacenter = 1,67 ; PUE PC perso = 1.
+  -> TOTAL run_1 ~ 1,15 g CO2eq.    (débit : 4,7 req/s, ~1800 tokens/s)
+  NB : le PUE 1,67 ne s'applique qu'au GPU (serveur) ; le CPU tourne sur un PC perso
+  hors datacenter, d'où PUE 1.
+  Repro Green Algorithms : GPU = 0,046 h, 1x H100 (TDP 400 W, usage mesuré 0,60 -> 11,1 Wh) ;
+  CPU = 0,046 h, AMD Ryzen 5 5600X (6 coeurs, ~40 W) ; mémoire négligeable ; France.
+
+----------------------------------------------------------------------------
+run_2 et run_3 — reranker GPT-5.4-nano via API (matériel/datacenter inconnus)
+----------------------------------------------------------------------------
+MATÉRIEL : AUCUN GPU local. LLM sur le matériel d'OpenAI (non observable) ; CPU AMD
+Ryzen 5 5600X (notre PC fixe, France) pour la cascade de règles + I/O.
+Green Algorithms INAPPLICABLE au LLM (GPU/datacenter non observables) -> estimation
+via EcoLogits 0.10 (le modèle gpt-5.4-nano figure dans sa base ; impact = f(tokens de
+SORTIE, taille du modèle) ; GWP = usage + embodied ; grille par défaut "WOR" monde).
+  - ~880 appels/run x ~50 tokens de sortie ; latence ~0,5 s/appel.
+  - LLM (EcoLogits, grille monde) : énergie ~3-8 Wh -> GWP ~1,2-3,4 g.
+    (la fourchette vient de la taille du modèle non publiée : EcoLogits suppose 15 à 58
+    milliards de paramètres. À titre indicatif, sur grille française : ~0,2-0,5 g.)
+  - CPU Ryzen 5 5600X (PC fixe, ~40 W x ~15 min ~ 10 Wh, France, PUE 1) ~ 0,5-0,6 g.
+  -> TOTAL par run ~ 1,8-4,0 g CO2eq.
+  LIMITE : EcoLogits ne facture que les tokens de SORTIE ; notre tâche est
+  input-heavy (~310 entrée / ~50 sortie) -> c'est plutôt une BORNE BASSE.
+  Script reproductible : experiments/ecologits_api_estimate.py.
+
+----------------------------------------------------------------------------
+BILAN (bonus frugalité)
+----------------------------------------------------------------------------
+Approche frugale par conception : pas d'entraînement, retrieval déterministe
+local, petit LLM appelé seulement sur les cas ambigus. CHAQUE run ~ 1-4 g CO2eq.
+  - run_1 (Gemma local, GPU H100 + CPU Ryzen 5 5600X) : ~ 1,15 g  -- énergie GPU MESURÉE.
+  - run_2 / run_3 (nano API + CPU Ryzen 5 5600X) : ~ 1,8-4,0 g chacun  -- estimé EcoLogits.
+  - Total opérationnel des 3 runs : ~ 4,8-9 g CO2eq.
+  Le run local a un avantage carbone MODÉRÉ (~1,5-3x), dû surtout à la grille
+  française décarbonée : en énergie d'inférence, le petit nano (3-8 Wh) consomme
+  en fait MOINS que Gemma (11,2 Wh). Coût API nano ~ 0,08 $/run.
+
+Méthodologie : Green Algorithms (calculator.green-algorithms.org) pour le matériel
+connu (énergie GPU mesurée) ; EcoLogits (ecologits.ai) pour le LLM via API.

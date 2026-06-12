@@ -1,0 +1,48 @@
+EXPLICATION DES RUNS — EvalLLM 2026, équipe acss-psl
+(à envoyer à julianne.flament@def.gouv.fr)
+====================================================================
+
+APPROCHE GÉNÉRALE (commune aux 3 runs)
+--------------------------------------
+Système entièrement À BASE DE RÈGLES + un petit LLM, SANS aucun modèle entraîné ni
+fine-tuning. Pour chaque mention (LOCATION → GeoNames ; pathogène/maladie/toxine →
+MeSH), une cascade déterministe est appliquée :
+
+1) Normalisation : minuscules NFC, nettoyage des artefacts (\n littéraux, guillemets,
+   espaces) ; variantes sans accents et translittération du grec en repli.
+
+2) Règles NIL : motifs lexicaux open-class repérant les mentions hors-référentiel
+   (concepts géographiques nus « africain/européen », quartiers/zones/bassins,
+   venins bruts…) → laissées non liées, conformément au guide d'alignement.
+
+3) GeoNames (LOCATION) : couche d'intercept (alias « Hexagone → France » cité par le
+   guide ; périphrases « territoire <gentilé> → pays » et « continent <adjectif> →
+   continent » ; sous-régions ONU — toutes validées guide/train gold), puis génération
+   de candidats via un index SQLite GeoNames (noms + noms alternatifs, codes de feature).
+   Post-traitement géographique (préférence admin/capitale, bascule PPL↔ADM4, garde-fou
+   rues/bâtiments) et replis de couverture (tiret↔espace, préfixe administratif).
+
+4) MeSH (concepts biomédicaux) : dictionnaire français curé (termes courants →
+   descripteurs MeSH) + overrides par label (distinction pathogène/maladie, ex. « VIH »
+   virus vs SIDA) ; sinon index MeSH FR/EN. Règle « souche » (ex. E. coli O104).
+   Propagation acronyme→forme développée au niveau du document (ex. « X (ACR) »).
+
+5) Désambiguïsation par LLM listwise : UNIQUEMENT quand ≥2 candidats subsistent — on
+   fournit au LLM le contexte + les top-5 candidats (zero-shot, température 0) et il
+   choisit. C'est le SEUL appel à un modèle de langage, et seulement sur les cas ambigus.
+
+Ce qui DISTINGUE les 3 runs : (a) quel LLM réalise l'étape 5, et (b) l'étendue de la
+couverture (avec ou sans ajouts informés par le test).
+
+EXPLICATION PAR RUN (2-3 lignes)
+--------------------------------
+• run_1 — Étape 5 réalisée par GEMMA-4-31B (open-weights) servi EN LOCAL (vLLM, 1× H100),
+  sans aucune API. Couverture étendue (exonymes FR via Wikidata + termes Marburg/TBE/VHC).
+  Variante frugale/locale ; qualité équivalente à GPT-5.4-nano (≈ 92,2 sur le train).
+
+• run_2 — Étape 5 réalisée par GPT-5.4-nano (API). Version STRICTEMENT GÉNÉRALISTE :
+  aucun ajout informé par le test (exonymes Wikidata et termes Marburg/TBE/VHC retirés),
+  uniquement règles + ressources train/guide.
+
+• run_3 — Étape 5 réalisée par GPT-5.4-nano (API), AVEC la couverture étendue (exonymes
+  Wikidata + Marburg/TBE/VHC). Configuration la plus complète.

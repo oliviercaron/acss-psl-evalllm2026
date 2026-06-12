@@ -1,0 +1,21 @@
+
+[top-5 run 1/2] RANKING=92.225 GeoNames_f1=91.06 MeSH_f1=94.74 (136s)
+[top-5 run 2/2] RANKING=92.225 GeoNames_f1=91.06 MeSH_f1=94.74 (186s)
+[top-10 run 1/2] RANKING=91.800 GeoNames_f1=90.41 MeSH_f1=94.74 (128s)
+[top-10 run 2/2] RANKING=92.010 GeoNames_f1=90.73 MeSH_f1=94.74 (135s)
+[top-15 run 1/2] RANKING=91.800 GeoNames_f1=90.41 MeSH_f1=94.74 (133s)
+[top-15 run 2/2] RANKING=91.800 GeoNames_f1=90.41 MeSH_f1=94.74 (135s)
+[top-20 run 1/2] RANKING=91.800 GeoNames_f1=90.41 MeSH_f1=94.74 (125s)
+[top-20 run 2/2] RANKING=92.010 GeoNames_f1=90.73 MeSH_f1=94.74 (129s)
+
+======================================================================
+# Candidate-list size sweep (context ±200, GeoNames only, 2 runs/config)
+======================================================================
+ top-k | RANKING mean |          range | GeoNames f1 mean
+------------------------------------------------------------
+ top-5 |       92.225 | 92.225..92.225 |           91.060
+top-10 |       91.905 | 91.800..92.010 |           90.570
+top-15 |       91.800 | 91.800..91.800 |           90.410
+top-20 |       91.905 | 91.800..92.010 |           90.570
+
+(anchors déjà connus : top-10 submission=91.42 ; top-10 ablation=91.635 ; top-30 @±600=91.21. Variance test-retest ≈ ±0.21.)

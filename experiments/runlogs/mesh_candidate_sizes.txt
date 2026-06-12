@@ -1,0 +1,7 @@
+# MeSH candidate-list sizes on train (deterministic). Source for notes §6.1.
+# 170 mentions à label MeSH. max=1
+     0 candidat(s): 71
+     1 candidat(s): 99
+   >=2 candidat(s): 0
+  AMBIGUOUS_MENTIONS curées: 5 entrées, tailles [2, 3]
+  => max_candidates (5/10/20) SANS effet pour MeSH (troncation jamais déclenchée).

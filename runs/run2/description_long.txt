@@ -1,0 +1,27 @@
+Run 2 — Cascade frugale règles + GPT-5.4-nano zero-shot listwise reranker, version itérée du Run 1 avec 3 ajouts ciblés.
+
+Architecture (inchangée vs Run 1) :
+- Retrieval déterministe SQLite/pickle (GeoNames 13M lieux + MeSH FR Inserm + MeSH EN NLM), dictionnaires manuels FR (157 termes médicaux), patterns NIL lexicaux pour locations sous-commune, strain override déterministe (regex + clés candidate o104/o157/ehec/stec).
+- LLM (GPT-5.4-nano, temperature=0, max_completion_tokens=100) appelé en mode « listwise picker » sur les cas ambigus ≥2 candidats, jamais en génération libre.
+- Post-processing GPS pour réconcilier les feature codes GeoNames (PPL vs ADM4 communes via haversine <5km + ratio population >0.80).
+
+Ajouts Run 2 (tous justifiés par le guide d'alignement officiel EvalLLM 2026, pas d'overtuning test-driven) :
+
+1. Normalisation Greek→Latin (`transliterate_greek`) appliquée comme fallback dans `_resolve_from_index`, `_resolve_from_fr_mesh`, et `_get_fr_mesh_candidates`. Couvre les 24 lettres grecques minuscules + variantes Unicode (ϕ U+03D5, ς U+03C2) + l'homoglyphe µ U+00B5 (micro sign) distinct de μ U+03BC (Greek mu). L'exact-match reste prioritaire (le fallback ne s'exécute que si la mention n'a aucun candidat avec sa forme native, ce qui préserve les rares entrées MeSH conservées en grec comme « α-gal allergy »). Gain : +5 entités (5 occurrences de « α-amanitine » dans doc#189 résolues vers MeSH D053959, Alpha-Amanitin).
+
+2. Résolution de périphrases géographiques (`_resolve_periphrase` dans `GeoNamesLinker`, appelé en tête de cascade). Deux couches :
+   - `FR_GEONAMES_ALIASES` (alias lexicaux fixes) : « hexagone » → France (GeoNames 3017382). Cité littéralement par le guide.
+   - `GENTILE_TO_COUNTRY_ID` (pattern productif) : regex `^territoire\s+(\w+)$` + dictionnaire 16 gentilés→ID PCLI (chinois→1814991, français→3017382, camerounais→2233387, américain→6252001, allemand, italien, espagnol, belge, portugais, russe, japonais, brésilien, indien, canadien, mexicain, australien). Exclut volontairement les gentilés ambigus (européen, africain, asiatique) qui désignent des concepts géographiques (NIL conforme guide). Garde-fou validé : « territoire de Krasnoyarsk » (krai russe réel) passe par la cascade GeoNames standard sans court-circuiter. Gain : +9 entités (5× Hexagone, 2× territoire chinois, 1× territoire français, 1× territoire camerounais).
+
+3. Retrait du pattern NIL `^fort\s+d[eu]\b` (cosmétique : 0 mention test, mais bloquait Fort-de-France à tort — PPLC Martinique GeoNames 3570675, 90k habitants). Le test `test_nil_fort_de` a été transformé en test négatif. Les cas légitimes type `fort de Corbas` (train, NIL gold) restent NIL via la cascade naturelle car `strip_prefix` ne touche pas « fort de ».
+
+Validation et non-régression :
+- 70/71 tests unitaires passés (1 skip légitime : μ-conotoxine GIIIA absent du dump MeSH local).
+- Score train --no-memory : 91.19 (vs 91.05 Run 1, +0.14 ranking, +0.34 GeoNames F1, MeSH inchangé).
+- Diff Run 1 → Run 2 : 14 NIL→linked (tous prédits/justifiés), 0 linked→NIL (aucune régression), 7 ID changed (variations LLM listwise marginales, dont 2 améliorations probables : France→3017382 PCLI, monde→6295630 Earth).
+
+Expérience secondaire — prompt LLM FR vs EN :
+A/B test sur train (config identique sauf langue du prompt). FR perd −1.07 pt ranking (91.19 EN → 90.12 FR) : −1.64 pt GeoNames F1, MeSH inchangé. Confirmation empirique de la littérature (8 papiers analysés, dont Zaghir et al. JMIR 2024 — scoping review médical avec auteurs LISN/CNRS — qui recommandent instructions EN + contexte source-lang ; Matsuo et al. Cancers 2024 cas biomédical JP ; Wendler et al. EPFL ACL 2024 sur le pivot latent anglais des LLMs multilingues). EN conservé pour la soumission.
+
+Aucun fine-tuning, aucun modèle entraîné par nous.
+Code source : https://github.com/oliviercaron/evalllm2026 (privé, sera rendu public après le challenge).

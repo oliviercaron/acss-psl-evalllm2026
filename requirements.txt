@@ -1,0 +1,16 @@
+# Runtime dependencies (entity linking pipeline)
+openai>=1.50,<3.0      # OpenAI API client (GPT-5.4-nano reranker)
+
+# Standard library only for the rest of the pipeline:
+# sqlite3, json, re, pickle, unicodedata, dataclasses, pathlib, typing, logging
+
+# Index building (one-time, prerequisite for running the linker)
+# - GeoNames: requires `allCountries.zip` and `alternateNamesV2.zip` from geonames.org
+# - MeSH:     requires `desc2026.xml` and `supp2026.xml` from NLM, plus
+#             `2026_js_elastic_mesh_bilingue.json` from Inserm
+
+# Testing
+pytest>=8.0,<9.0
+
+# Optional: development helpers (not required for inference)
+# pytest-cov, ruff, mypy

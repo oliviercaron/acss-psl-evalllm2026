@@ -1,0 +1,44 @@
+[SUPERSÉDÉ] Estimation initiale (méthode par-token, grille US, ~69 g). Méthode + chiffres
+corrigés dans ../../CARBON_FOOTPRINT.md et ../submission_sent/CARBON_FOOTPRINT.txt :
+Green Algorithms pour le matériel connu + EcoLogits pour l'API ; CPU réel = AMD Ryzen 5 5600X.
+Chiffres corrigés : run local Gemma ~1,15 g ; run API nano ~1,8-4,0 g/run (PAS ~69 g).
+NB : run1/2/3 ici = les 3 runs nano de DÉV ; la soumission finale = run_1 gemma + run_2 nano
+clean + run_3 nano test-informé (cf. ../submission_sent/).
+=======================================================================
+
+Empreinte carbone Run 2 sur test_evalLLM.json (200 docs, 1840 entités)
+=======================================================================
+
+Durée totale du run : ~17 minutes (sync, séquentiel) — légèrement plus long
+que Run 1 (~11 min) car +14 entités déclenchent désormais le linker complet
+au lieu d'être pré-filtrées en NIL (ce qui ajoute quelques chemins LLM).
+
+Composants :
+- LLM cloud (GPT-5.4-nano, OpenAI/Azure US-East) :
+  * ~820-920 appels estimés (mentions avec ≥2 candidats, +20-30 vs Run 1
+    car les 14 mentions ex-NIL passent maintenant par la cascade complète)
+  * ~310 tokens input + ~50 tokens output par appel
+  * Énergie ≈ 0.5 mWh/token × ~325K tokens = 163 Wh × PUE 1.12 = 182 Wh = 0.182 kWh
+  * Intensité carbone Azure US-East ≈ 370 g CO₂eq/kWh
+  * Sous-total LLM : ~67 g CO₂eq
+
+- CPU local (i7-12th gen, 35W moyen, 17 min) :
+  * 35 W × 17/60 h = 9.9 Wh = 0.0099 kWh
+  * Intensité carbone France 2025 ≈ 70 g CO₂eq/kWh (nucléaire dominant)
+  * Sous-total CPU : ~0.7 g CO₂eq
+
+- SQLite + I/O : négligeable (<0.1 g)
+
+TOTAL Run 2 : ~68 g CO₂eq (+3 g vs Run 1)
+Équivalent : ≈ 340 m en voiture thermique, ou ≈ 5 min de streaming HD
+
+À cela s'ajoute le coût ponctuel de l'expérience A/B prompt FR vs EN
+(train, ~5 min, ~$0.03 API, ~22 g CO₂eq) qui a permis de valider
+empiriquement le choix du prompt EN pour Run 2 et 3. Ce coût n'est pas
+inclus dans le total ci-dessus car il s'agit d'une étape de validation
+méthodologique, pas de la soumission elle-même.
+
+Méthodologie : Green Algorithms Calculator v2.2 (Lacoste et al. 2019)
+Incertitude : ±50% sur l'énergie LLM cloud (non publiée par OpenAI)
+
+Coût API estimé : ~$0.08 (identique à Run 1, le coût additionnel est marginal)

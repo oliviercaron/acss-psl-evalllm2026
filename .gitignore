@@ -1,0 +1,71 @@
+# ============================================================
+#  Protected challenge data — NEVER COMMIT
+#  (EvalLLM 2026 organizers' agreement: not redistributable)
+# ============================================================
+data/protected/*
+!data/protected/.gitkeep
+!data/protected/README.md
+
+# ============================================================
+#  Large rebuildable indexes — rebuild locally from raw sources
+#  (geonames.db ~2.8 GB, mesh_index.pkl ~143 MB)
+# ============================================================
+data/processed/*
+!data/processed/.gitkeep
+
+# ============================================================
+#  Public raw sources — download locally (see data/README.md)
+# ============================================================
+data/raw/geonames/*
+!data/raw/geonames/.gitkeep
+data/raw/mesh/*
+!data/raw/mesh/.gitkeep
+
+# ============================================================
+#  Prediction outputs — embed protected test/train document text
+# ============================================================
+runs/**/*.json
+runs/local/
+predictions*.json
+experiments/*train_preds*.json
+experiments/*_preds*.json
+experiments/*.jsonl
+
+# ============================================================
+#  Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# ============================================================
+#  LaTeX build artifacts (keep the .tex / .bib / .pdf, drop the rest)
+# ============================================================
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.fls
+paper/*.fdb_latexmk
+
+# ============================================================
+#  Secrets / environment
+# ============================================================
+.env
+
+# ============================================================
+#  OS / editors
+# ============================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
