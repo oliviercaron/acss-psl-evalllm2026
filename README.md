@@ -21,7 +21,7 @@ dans une liste fermée, il ne génère jamais d'identifiant).
 
 Détails dans [`docs/`](docs/) et l'article ([`paper/`](paper/)).
 
-## Ce qui n'est pas inclus (et pourquoi)
+## Ce qui n'est pas inclus
 
 | Élément | Raison | Comment l'obtenir |
 |---|---|---|
